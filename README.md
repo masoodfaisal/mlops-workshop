@@ -8,7 +8,7 @@ The following technologies have been used
 To run pipelines to train model and to deploy
 
 ## Verta.AI
-To keep track of experiments and model registry
+To keep track of experiments, data versioning and model registry
 
 ## Seldon
 To deploy model
