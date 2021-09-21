@@ -11,6 +11,7 @@ class CustomerChurnOutlierTransformer(object):
     def transform_input(self, X, feature_names, meta):
 
         df = pd.DataFrame(X, columns=feature_names)
+        df = df.drop(['customerID'], axis=1)
         df = self.encoder.transform(df)
         df = self.onehotencoder.transform(df)
         return df.to_numpy()

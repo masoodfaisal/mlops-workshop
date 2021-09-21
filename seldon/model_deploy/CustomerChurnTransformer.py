@@ -3,6 +3,9 @@ import joblib
 import pandas as pd
 
 class CustomerChurnDriftTransformer(object):
+    def __init__(self):
+        self.encoder = joblib.load('CustomerChurnOrdinalEncoder.pkl')
+        self.onehotencoder = joblib.load('CustomerChurnOneHotEncoder.pkl')
     def transform_input(self, X, feature_names, meta):
         # print(X)
         # print(feature_names)
