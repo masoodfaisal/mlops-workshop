@@ -10,6 +10,7 @@
 FROM quay.io/ml-aml-workshop/python:3.7-slimv2
 
 WORKDIR /microservice
+RUN pip install alibi_detect
 COPY CustomerChurnDriftPredictor.py  CustomerChurnDriftTransformer.py CustomerChurnDriftPredictor.sav /microservice/
 
 ENV PERSISTENCE 0

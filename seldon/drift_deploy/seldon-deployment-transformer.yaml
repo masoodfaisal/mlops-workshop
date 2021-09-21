@@ -6,7 +6,7 @@ metadata:
   name: model-EXPERIMENT_ID
 spec:
   annotations:
-    project_name: customer-churn
+    project_name: customer-churn-drift
     deployment_version: "EXPERIMENT_ID"
 #     seldon.io/engine-separate-pod: "true"
   name: customer-churn-seldon-spec
@@ -24,10 +24,10 @@ spec:
           containers:
             - image: "image-registry.openshift-image-registry.svc:5000/IMAGE_NAME"
               imagePullPolicy: Always
-              name: customerchurntransformer
+              name: customerchurndrifttransformer
               env:
                 - name: MODEL_NAME
-                  value: CustomerChurnTransformer
+                  value: CustomerChurnDriftTransformer
                 - name: SERVICE_TYPE
                   value: TRANSFORMER
                 - name: GRPC_PORT
@@ -38,10 +38,10 @@ spec:
                   value: "9000"
             - image: "image-registry.openshift-image-registry.svc:5000/IMAGE_NAME"
               imagePullPolicy: Always
-              name: customerchurnpredictor
+              name: customerchurndriftpredictor
               env:
                 - name: MODEL_NAME
-                  value: CustomerChurnPredictor
+                  value: CustomerChurnDriftPredictor
                 - name: SERVICE_TYPE
                   value: MODEL
                 - name: GRPC_PORT
@@ -54,14 +54,14 @@ spec:
 
       graph:
         children:
-        - name: customerchurnpredictor
+        - name: customerchurndriftpredictor
           type: MODEL
           endpoint:
             type: REST
             service_host: localhost
             service_port: 9001
 
-        name: customerchurntransformer
+        name: customerchurndrifttransformer
         endpoint:
           type: REST
           service_host: localhost
