@@ -10,7 +10,7 @@
 FROM quay.io/ml-aml-workshop/python:3.7-slimv2
 
 WORKDIR /microservice
-COPY CustomerChurnPredictor.py  CustomerChurnTransformer.py CustomerChurnPredictor.sav CustomerChurnOrdinalEncoder.pkl CustomerChurnOneHotEncoder.pkl /microservice/
+COPY CustomerChurnDriftPredictor.py  CustomerChurnDriftTransformer.py CustomerChurnDriftPredictor.sav CustomerChurnDriftOrdinalEncoder.pkl CustomerChurnDriftOneHotEncoder.pkl /microservice/
 
 ENV PERSISTENCE 0
 CMD seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE --persistence $PERSISTENCE --grpc-port ${GRPC_PORT} --metrics-port ${METRICS_PORT} --http-port ${HTTP_PORT}
