@@ -7,7 +7,7 @@ import json
 class CustomerChurnDriftPredictor(object):
 
     def __init__(self):
-        self.model = joblib.load('CustomerChurnDriftModel.sav')
+        self.model = joblib.load('CustomerChurnDriftPredictor.sav')
         #self.model = load_detector('model')
 
     def predict_raw(self, request):

@@ -3,9 +3,9 @@
 .DS_Store
 notebooks/production_input_drift_detection/CustomerChurnDriftFeaturesColumns.pkl
 notebooks/production_input_drift_detection/CustomerChurnDriftModel.sav
-.gitignore
-.gitignore
 seldon/drift_deploy/CustomerChurnDriftModel.sav
 seldon/drift_deploy/model/meta.dill
 seldon/drift_deploy/model/TabularDrift.dill
-.gitignore
+notebooks/production_input_drift_detection/CustomerChurnDriftPredictor.sav
+notebooks/production_input_drift_detection/CustomerChurnDriftPredictor/*
+seldon/drift_deploy/CustomerChurnDriftPredictor.sav
