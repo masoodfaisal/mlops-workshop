@@ -7,10 +7,18 @@
 
 # EXPOSE 5000
 #
-FROM quay.io/ml-aml-workshop/python:3.7-slimv2
+FROM registry.access.redhat.com/ubi8/python-38
 
 WORKDIR /microservice
 RUN pip install alibi_detect
+RUN pip install seldon-core
+RUN pip install joblib
+RUN pip install scikit-learn
+RUN pip install category_encoders
+RUN pip install dill
+USER root
+RUN dnf install -y mesa-libGL
+USER 1001
 COPY CustomerChurnDriftPredictor.py  CustomerChurnDriftTransformer.py CustomerChurnDriftPredictor.sav /microservice/
 
 ENV PERSISTENCE 0
