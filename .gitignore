@@ -1,2 +1,11 @@
 /notebooks/training_record_experiments/pip_freeze
 /notebooks/training_record_experiments/pip_freeze.txt
+.DS_Store
+notebooks/production_input_drift_detection/CustomerChurnDriftFeaturesColumns.pkl
+notebooks/production_input_drift_detection/CustomerChurnDriftModel.sav
+.gitignore
+.gitignore
+seldon/drift_deploy/CustomerChurnDriftModel.sav
+seldon/drift_deploy/model/meta.dill
+seldon/drift_deploy/model/TabularDrift.dill
+.gitignore

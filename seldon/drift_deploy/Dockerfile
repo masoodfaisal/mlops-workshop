@@ -19,6 +19,7 @@ RUN pip install dill
 USER root
 RUN dnf install -y mesa-libGL
 USER 1001
+# ADD CustomerChurnDriftPredictor /microservice/CustomerChurnDriftPredictor
 COPY CustomerChurnDriftPredictor.py  CustomerChurnDriftTransformer.py CustomerChurnDriftPredictor.sav /microservice/
 
 ENV PERSISTENCE 0

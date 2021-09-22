@@ -8,6 +8,7 @@ class CustomerChurnDriftTransformer(object):
         # print(feature_names)
         # print(meta)
         df = pd.DataFrame(X, columns=feature_names)
+
         df = df.drop(['customerID'], axis=1)
         # print(df.to_numpy())
         return df.to_numpy()
