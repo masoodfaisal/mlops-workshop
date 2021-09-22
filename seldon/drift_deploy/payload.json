@@ -1,0 +1,21 @@
+{"data":
+    {
+  
+  
+          "names":
+              [
+                "gender","SeniorCitizen","Partner","Dependents","tenure","PhoneService",
+                "MultipleLines","InternetService","OnlineSecurity",
+                "OnlineBackup","DeviceProtection","TechSupport","StreamingTV","StreamingMovies",
+                "Contract",
+                "PaperlessBilling","PaymentMethod","MonthlyCharges","TotalCharges"
+              ],
+      "ndarray": [["Female", 0,"Yes","No",1,"No","No phone service","DSL","No","Yes","No","Yes","No","No","Month-to-month","Yes","Electronic check",29.85,29.85]]
+  
+    }
+  }
+
+
+curl -vvv --header "Content-type: Application/json" -X POST --data-binary @b.json http://localhost:9004/api/v1.0/predictions
+
+docker run -it -e MODEL_NAME=CustomerChurnDriftPredictor -e SERVICE_TYPE=MODEL -e HTTP_PORT=9004 -p 9004:9004 -e GRPC_PORT=5008 -e METRICS_PORT=5009 -e SELDON_LOG_LEVEL=DEBUG a:0.0.1
