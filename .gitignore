@@ -9,3 +9,4 @@ seldon/drift_deploy/model/TabularDrift.dill
 notebooks/production_input_drift_detection/CustomerChurnDriftPredictor.sav
 notebooks/production_input_drift_detection/CustomerChurnDriftPredictor/*
 seldon/drift_deploy/CustomerChurnDriftPredictor.sav
+notebooks/training_record_experiments/mlruns/0/meta.yaml
