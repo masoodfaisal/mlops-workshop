@@ -9,9 +9,12 @@ class CustomerChurnOutlierTransformer(object):
         self.onehotencoder = joblib.load('CustomerChurnOutlierOneHotEncoder.pkl')
 
     def transform_input(self, X, feature_names, meta):
-
+        print (X)
+        print (feature_names)
         df = pd.DataFrame(X, columns=feature_names)
-        df = df.drop(['customerID'], axis=1)
+        # df = df.drop(['customerID'], axis=1)
         df = self.encoder.transform(df)
         df = self.onehotencoder.transform(df)
+        print (df.to_numpy())
+
         return df.to_numpy()
