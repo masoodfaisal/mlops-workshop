@@ -21,7 +21,7 @@ RUN dnf install -y mesa-libGL
 USER 1001
 
 
-COPY CustomerChurnOutlierPredictor.py  CustomerChurnOutlierTransformer.py CustomerChurnOutlierPredictor.sav CustomerChurnOutlierOrdinalEncoder.pkl CustomerChurnOutlierOneHotEncoder.pkl /microservice/
+COPY CustomerChurnOutlierPredictor.py  CustomerChurnOutlierTransformer.py CustomerChurnOutlierPredictor.sav CustomerChurnFeaturesColumns.pkl  CustomerChurnOutlierOrdinalEncoder.pkl CustomerChurnOutlierOneHotEncoder.pkl /microservice/
 
 ENV PERSISTENCE 0
 CMD seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE --persistence $PERSISTENCE --grpc-port ${GRPC_PORT} --metrics-port ${METRICS_PORT} --http-port ${HTTP_PORT}
