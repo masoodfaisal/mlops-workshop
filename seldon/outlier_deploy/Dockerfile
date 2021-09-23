@@ -7,10 +7,21 @@
 
 # EXPOSE 5000
 #
-FROM quay.io/ml-aml-workshop/python:3.7-slimv2
+FROM registry.access.redhat.com/ubi8/python-38
 
 WORKDIR /microservice
-COPY CustomerChurnOutlierPredictor.py  CustomerChurnOutlierTransformer.py CustomerChurnOutlierPredictor.sav CustomerChurnOutlierOrdinalEncoder.pkl CustomerChurnOutlierOneHotEncoder.pkl /microservice/
+
+
+RUN pip install seldon-core
+RUN pip install joblib
+RUN pip install scikit-learn
+RUN pip install category_encoders
+USER root
+RUN dnf install -y mesa-libGL
+USER 1001
+
+
+COPY CustomerChurnOutlierPredictor.py  CustomerChurnOutlierTransformer.py CustomerChurnOutlierPredictor.sav CustomerChurnFeaturesColumns.pkl  CustomerChurnOutlierOrdinalEncoder.pkl CustomerChurnOutlierOneHotEncoder.pkl /microservice/
 
 ENV PERSISTENCE 0
 CMD seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE --persistence $PERSISTENCE --grpc-port ${GRPC_PORT} --metrics-port ${METRICS_PORT} --http-port ${HTTP_PORT}
