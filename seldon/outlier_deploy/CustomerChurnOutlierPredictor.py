@@ -9,7 +9,7 @@ class CustomerChurnOutlierPredictor(object):
 
     def predict_raw(self, request):
         data = request.get("data", {}).get("ndarray")
-        print(data)
+        # print(data)
         mult_types_array = np.array(data, dtype=object)
 
         result = self.model.predict(mult_types_array)
