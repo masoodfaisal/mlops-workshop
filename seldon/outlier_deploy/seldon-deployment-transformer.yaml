@@ -3,11 +3,11 @@ kind: SeldonDeployment
 metadata:
   labels:
     app: seldon
-  name: model-EXPERIMENT_ID
+  name: model-Saeed
 spec:
   annotations:
     project_name: customer-churn-outlier
-    deployment_version: "EXPERIMENT_ID"
+    deployment_version: "Saeed"
 #     seldon.io/engine-separate-pod: "true"
   name: customer-churn-seldon-spec
   predictors:
@@ -22,7 +22,7 @@ spec:
           minReplicas: 1
         spec:
           containers:
-            - image: "image-registry.openshift-image-registry.svc:5000/IMAGE_NAME"
+            - image: "quay.io/skasmani/mlops-outlier:0.0.1"
               imagePullPolicy: Always
               name: customerchurnoutliertransformer
               env:
@@ -36,7 +36,7 @@ spec:
                   value: "6005"
                 - name: HTTP_PORT
                   value: "9000"
-            - image: "image-registry.openshift-image-registry.svc:5000/IMAGE_NAME"
+            - image: "quay.io/skasmani/mlops-outlier:0.0.1"
               imagePullPolicy: Always
               name: customerchurnoutlierpredictor
               env:
