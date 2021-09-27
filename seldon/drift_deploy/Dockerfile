@@ -20,7 +20,7 @@ USER root
 RUN dnf install -y mesa-libGL
 USER 1001
 # ADD CustomerChurnDriftPredictor /microservice/CustomerChurnDriftPredictor
-COPY CustomerChurnDriftPredictor.py  CustomerChurnDriftTransformer.py CustomerChurnDriftPredictor.sav /microservice/
-
+COPY CustomerChurnDriftPredictor.py model.pkl CustomerChurnDriftTransformer.py CustomerChurnDriftPredictor.sav /microservice/
+RUN cp model.pkl CustomerChurnDriftPredictor.sav
 ENV PERSISTENCE 0
 CMD seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE --persistence $PERSISTENCE --grpc-port ${GRPC_PORT} --metrics-port ${METRICS_PORT} --http-port ${HTTP_PORT}
