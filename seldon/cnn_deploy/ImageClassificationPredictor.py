@@ -14,11 +14,6 @@ class ImageClassificationPredictor(object):
         self.class_name = joblib.load('ImageClassificationClassNames.pkl')
 
 
-    # def loadImage(URL):
-    #     with urllib.request.urlopen(URL) as url:
-    #         img = image.load_img(BytesIO(url.read()), target_size=(125, 125))
-    #
-    #     return image.img_to_array(img)
     def predict_raw(self, request1):
         print(request1.get("data", {}))
         img_path = request1.get("data", {}).get("path")
@@ -38,10 +33,11 @@ class ImageClassificationPredictor(object):
         class_label = self.class_name[np.argmax(score)]
         conf = 100 * np.max(score)
         results = [class_label,conf]
-        print(
-            "This image most likely belongs to {} with a {:.2f} percent confidence."
-            .format(self.class_name[np.argmax(score)], 100 * np.max(score))
-        )
+        print(results)
+        # print(
+        #     "This image most likely belongs to {} with a {:.2f} percent confidence."
+        #     .format(self.class_name[np.argmax(score)], 100 * np.max(score))
+        # )
         # return results
         return json.dumps(results, cls=JsonSerializer)
 
