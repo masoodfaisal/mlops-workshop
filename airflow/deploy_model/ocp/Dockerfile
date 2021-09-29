@@ -13,4 +13,4 @@ USER 1001
 # ADD CustomerChurnDriftPredictor /microservice/CustomerChurnDriftPredictor
 COPY Predictor.py model.pkl Transformer.py  /microservice/
 ENV PERSISTENCE 0
-CMD seldon-core-microservice Predictor --service-type $SERVICE_TYPE --persistence $PERSISTENCE --grpc-port ${GRPC_PORT} --metrics-port ${METRICS_PORT} --http-port ${HTTP_PORT}
+CMD seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE --persistence $PERSISTENCE --grpc-port ${GRPC_PORT} --metrics-port ${METRICS_PORT} --http-port ${HTTP_PORT}
