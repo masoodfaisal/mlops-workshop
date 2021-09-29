@@ -27,9 +27,23 @@ spec:
                 name: {{  model_name }}
                 env:
                   - name: MODEL_NAME
-                    value: {{  model_name }}
+                    value: "Predictor"
                   - name: SERVICE_TYPE
                     value: MODEL
+                  - name: GRPC_PORT
+                    value: "5005"
+                  - name: METRICS_PORT
+                    value: "6005"
+                  - name: HTTP_PORT
+                    value: "9000"
+              - image: "image-registry.openshift-image-registry.svc:5000/{{project}}/{{image_name}}"
+                imagePullPolicy: Always
+                name: {{  model_name }}-transformer
+                env:
+                  - name: MODEL_NAME
+                    value: "Transformer"
+                  - name: SERVICE_TYPE
+                    value: TRANSFORMER
                   - name: GRPC_PORT
                     value: "5005"
                   - name: METRICS_PORT
@@ -39,12 +53,23 @@ spec:
 
 
       graph:
-        name: {{  model_name }}
+        children:
+        - name: {{  model_name }}
+          type: MODEL
+          endpoint:
+            type: REST
+            service_host: localhost
+            service_port: 9001
+        name: {{  model_name }}-transformer
         endpoint:
           type: REST
           service_host: localhost
           service_port: 9000
-        type: MODEL
+        type: TRANSFORMER
+        # logger:
+        #   url: http://logger.seldon/
+        #   mode: all
+
       name: {{  model_name }}
       annotations:
         predictor_version: {{  experiment_id }}
