@@ -13,7 +13,7 @@ WORKDIR /microservice
 RUN pip install tensorflow
 RUN pip install seldon-core
 RUN pip install joblib
-RUN pip install tensorflow_hub
+# RUN pip install tensorflow_hub
 RUN pip install scikit-learn
 RUN pip install pillow
 USER root
