@@ -62,8 +62,8 @@ def download_artifacts():
 #     artifact_location = mlflow.get_experiment_by_name('rossdemo').artifact_location
 #     print("downloading artifacts from s3 bucket " + artifact_location)
 
-    data_file_model = minioClient.fget_object("mlflow", f"/{experiment_id}/{run_id}/artifacts/model/model.pkl", "/tmp/model.pkl")
-    data_file_requirements = minioClient.fget_object("mlflow", f"/{experiment_id}/{run_id}/artifacts/model/model.pkl", "/tmp/requirements.txt")
+    data_file_model = minioClient.fget_object("mlflow", f"/{experiment_id}/{run_id}/artifacts/model/model.pkl", "model.pkl")
+    data_file_requirements = minioClient.fget_object("mlflow", f"/{experiment_id}/{run_id}/artifacts/model/model.pkl", "requirements.txt")
     #Using boto3 Download the files from mlflow, the file path is in the model meta
     #write the files to the file system
     print("download successful")
@@ -106,7 +106,7 @@ with oc.api_server(server):
                 print(build_details.as_json())
 
             print("Starting Build and Wiating.....")
-            build_exec = oc.start_build([build_name, "--from-dir", ".", "--follow", "--build-loglevel", "10"])
+            build_exec = oc.start_build([build_name, "--from-dir", ".", "--follow", "--build-loglevel", "10"])# docker build and push
             print("Build Finished")
             status = build_exec.status()
             print(status)
