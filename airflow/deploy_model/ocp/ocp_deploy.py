@@ -1,8 +1,13 @@
-!pip install mlflow
-!pip install minio
-!pip install boto3
-!pip install sklearn
-!pip install openshift-client
+# !pip install mlflow
+# !pip install minio
+# !pip install boto3
+# !pip install scikit-learn==0.24.2
+# !pip install openshift-client==1.0.13
+# !pip show mlflow
+# !pip show minio
+# !pip show boto3
+# !pip show scikit-learn
+# !pip show openshift-client
 
 import os
 import mlflow
@@ -15,14 +20,15 @@ os.environ['AWS_ACCESS_KEY_ID']='minio'
 os.environ['AWS_SECRET_ACCESS_KEY']='minio123'
 os.environ['AWS_REGION']='us-east-1'
 os.environ['AWS_BUCKET_NAME']='mlflow'
-os.environ['MODEL_NAME'] = 'rossdemo'
-os.environ['MODEL_VERSION'] = '1'
+# os.environ['MODEL_NAME'] = 'rossdemo'
+# os.environ['MODEL_VERSION'] = '1'
+# os.environ['OPENSHIFT_CLIENT_PYTHON_DEFAULT_OC_PATH'] = '/tmp/oc'
 
 HOST = "http://mlflow:5500"
 
 model_name = os.environ["MODEL_NAME"]
 model_version = os.environ["MODEL_VERSION"]
-build_name = f"deploy-{model_name}-{model_version}"
+build_name = f"seldon-model-{model_name}-v{model_version}"
 
 def get_s3_server():
     minioClient = Minio('minio-ml-workshop:9000',
@@ -53,8 +59,8 @@ def download_artifacts():
     print("initializing connection to s3 server...")
     minioClient = get_s3_server()
 
-    artifact_location = mlflow.get_experiment_by_name('rossdemo').artifact_location
-    print("downloading artifacts from s3 bucket " + artifact_location)
+#     artifact_location = mlflow.get_experiment_by_name('rossdemo').artifact_location
+#     print("downloading artifacts from s3 bucket " + artifact_location)
 
     data_file_model = minioClient.fget_object("mlflow", f"/{experiment_id}/{run_id}/artifacts/model/model.pkl", "/tmp/model.pkl")
     data_file_requirements = minioClient.fget_object("mlflow", f"/{experiment_id}/{run_id}/artifacts/model/model.pkl", "/tmp/requirements.txt")
@@ -62,38 +68,57 @@ def download_artifacts():
     #write the files to the file system
     print("download successful")
     
+    return run_id
+    
         
 init()
-download_artifacts()
+run_id = download_artifacts()
 
-print('OpenShift client version: {}'.format(oc.get_client_version()))
-print('OpenShift server version: {}'.format(oc.get_server_version()))
+print("Start OCP things...")
+
+server = "https://" + os.environ["KUBERNETES_SERVICE_HOST"] + ":" + os.environ["KUBERNETES_SERVICE_PORT"] 
+print(server)
 
 #build from source Docker file
-with oc.project('ml-workshop'), oc.timeout(10*60):
-    build_config = oc.selector(f"bc/{build_name}").count_existing() #.object
+with open('/var/run/secrets/kubernetes.io/serviceaccount/token', 'r') as file:
+    token = file.read()
+print(f"Openshift Token{token}")
 
-    print(build_config)
-    if build_config == 0:
-        oc.new_build(["--strategy", "docker", "--binary", "--docker-image", "registry.access.redhat.com/ubi8/python-38:1-71", "--name", build_name ])
-    else:
-        build_details = oc.selector(f"bc/{build_name}").object()
-        print(build_details.as_json())
+#/var/run/secrets/kubernetes.io/serviceaccount
+with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as namespace:
+    project = namespace.read()
+print(f"Project name: {project}")
 
-    print("Starting Build and Wiating.....")
-    build_exec = oc.start_build([build_name, "--from-dir", ".", "--follow", "--build-loglevel", "10"])
-    print("Build Finished")
-    status = build_exec.status()
-    print(status)
-    for k, v in oc.selector([f"bc/{build_name}"]).logs(tail=500).items():
-        print('Build Log: {}\n{}\n\n'.format(k, v))
+#build from source Docker file
+with oc.api_server(server):
+    with oc.token(token):
+        with oc.project(project), oc.timeout(10*60):
+            print('OpenShift client version: {}'.format(oc.get_client_version()))
+            #print('OpenShift server version: {}'.format(oc.get_server_version()))
 
-    seldon_deploy = oc.selector(f"SeldonDeployment/{build_name}").count_existing()
-    
-    experiment_id = mlflow.get_run(run_id).info.experiment_id
-    
-    if seldon_deploy == 0:
-        template_data = {"experiment_id": experiment_id, "model_name": model_name}
-        applied_template = Template(open("SeldonDeploy.yaml").read())
-        print(applied_template.render(template_data))
-        
+            build_config = oc.selector(f"bc/{build_name}").count_existing() #.object
+            print(oc.get_project_name())
+            print(build_config)
+            if build_config == 0:
+                oc.new_build(["--strategy", "docker", "--binary", "--docker-image", "registry.access.redhat.com/ubi8/python-38:1-71", "--name", build_name ])
+            else:
+                build_details = oc.selector(f"bc/{build_name}").object()
+                print(build_details.as_json())
+
+            print("Starting Build and Wiating.....")
+            build_exec = oc.start_build([build_name, "--from-dir", ".", "--follow", "--build-loglevel", "10"])
+            print("Build Finished")
+            status = build_exec.status()
+            print(status)
+            for k, v in oc.selector([f"bc/{build_name}"]).logs(tail=500).items():
+                print('Build Log: {}\n{}\n\n'.format(k, v))
+
+            seldon_deploy = oc.selector(f"SeldonDeployment/{build_name}").count_existing()
+
+            experiment_id = mlflow.get_run(run_id).info.experiment_id
+
+            if seldon_deploy == 0:
+                template_data = {"experiment_id": run_id, "model_name": model_name, "image_name": build_name, "project": project}
+                applied_template = Template(open("SeldonDeploy.yaml").read())
+                print(applied_template.render(template_data))
+                oc.create(applied_template.render(template_data))
