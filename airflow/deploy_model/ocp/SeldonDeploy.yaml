@@ -35,7 +35,7 @@ spec:
                   - name: METRICS_PORT
                     value: "6005"
                   - name: HTTP_PORT
-                    value: "9000"
+                    value: "9001"
               - image: "image-registry.openshift-image-registry.svc:5000/{{project}}/{{image_name}}"
                 imagePullPolicy: Always
                 name: {{  model_name }}-transformer
