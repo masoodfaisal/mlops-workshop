@@ -1,5 +1,6 @@
 import openshift as oc
 import os
+import sys
 import time
 from jinja2 import Template
 
@@ -25,15 +26,20 @@ print(f"Project name: {project}")
 spark_crd_name = "SparkCluster"
 cluster_prefix = "spark-cluster"
 cluster_name = os.environ["SPARK_CLUSTER"]
-timeout_seconds = 120
+timeout_seconds = 360
 
 
 # run predicate func every 3 seconds until it returns true
 def wait(predicate, timeout):
+    print("Waiting for spark cluster to be ready...")
     mustend = time.time() + timeout
     while time.time() < mustend:
-        if predicate: return True
+        if predicate:
+            print("Cluster is ready")
+            return True
         time.sleep(3)
+    
+    print(f"Cluster was not ready after a given timeout {timeout}s")
     return False
 
 
@@ -64,7 +70,7 @@ with oc.api_server(server):
                 ready = wait(ready_pred, timeout_seconds)
 
                 if not ready:
-                    print(f"Cluster was not ready after a given time {timeout_seconds}s")
+                    sys.exit(1)
 
                 print(f"SparkCluster {cluster_prefix}-{cluster_name} created")
                 # task_instance = context['task_instance']

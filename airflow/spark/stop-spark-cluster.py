@@ -19,7 +19,6 @@ with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as nam
 print(f"Project name: {project}")
 
 spark_crd_name = "SparkCluster"
-cluster_prefix = "spark-cluster"
 
 if os.getenv('SPARK_CLUSTER') is None:
     with open('spark-info.txt', 'r') as sparkinfo:
@@ -36,14 +35,14 @@ with oc.api_server(server):
             with open('spark-info.txt', 'r') as file:
                 cluster_name = file.read()
 
-            print(f"Searching for SparkCluster with name {cluster_prefix}-{cluster_name}...")
-            cluster_count = oc.selector(f"{spark_crd_name}/{cluster_prefix}-{cluster_name}").count_existing()
-            print(f"SparkCluster found: {cluster_prefix}-{cluster_count}")
+            print(f"Searching for SparkCluster with name {cluster_name}...")
+            cluster_count = oc.selector(f"{spark_crd_name}/{cluster_name}").count_existing()
+            print(f"SparkCluster found: {cluster_count}")
 
             print(cluster_count)
             if cluster_count > 0:
-                print(f"Deleting cluster {cluster_prefix}-{cluster_name}")
-                oc.oc_action(oc.cur_context(), "delete", cmd_args=[spark_crd_name, f"{cluster_prefix}-{cluster_name}"])
+                print(f"Deleting cluster {cluster_name}")
+                oc.oc_action(oc.cur_context(), "delete", cmd_args=[spark_crd_name, f"{cluster_name}"])
                 print("SparkCluster deleted")
             else:
                 print(f"Spark Cluster does not exists {cluster_name}")
