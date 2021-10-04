@@ -26,22 +26,25 @@ print(f"Project name: {project}")
 spark_crd_name = "SparkCluster"
 cluster_prefix = "spark-cluster"
 cluster_name = os.environ["SPARK_CLUSTER"]
-timeout_seconds = 360
+worker_nodes = os.environ["WORKER_NODES"]
+
+if os.getenv("worker_nodes") is None:
+    worker_nodes = "2"
+
+timeout_seconds = 300
 
 
-# run predicate func every 3 seconds until it returns true
+# evaluate predicate func every 5 seconds until it returns true
 def wait(predicate, timeout):
-    print("Waiting for spark cluster to be ready...")
     mustend = time.time() + timeout
+    time.sleep(5)
     while time.time() < mustend:
-        if predicate:
-            print("Cluster is ready")
-            return True
-        time.sleep(3)
-    
-    print(f"Cluster was not ready after a given timeout {timeout}s")
+        try:
+            if predicate(1) : return True
+        except Exception as ex:
+            print(ex)
+        time.sleep(5)
     return False
-
 
 # Connect to Openshift
 with oc.api_server(server):
@@ -53,31 +56,36 @@ with oc.api_server(server):
             cluster_count = oc.selector(f"{spark_crd_name}/{cluster_prefix}-{cluster_name}").count_existing()
             print(f"SparkCluster found: {cluster_count}")
 
-            # Only create Spark cluster if it doesn't exist
-            if cluster_count == 0:
-
-                template_data = {"clustername": f"{cluster_prefix}-{cluster_name}"}
-                applied_template = Template(open("spark-cluster.yaml").read())
-
-                print(f"Creating SparkCluster {cluster_prefix}-{cluster_name} ...")
-                # print(applied_template.render(template_data))
-                oc.create(applied_template.render(template_data))
-
-                ready_pred = oc.selector(f"{spark_crd_name}/{cluster_prefix}-{cluster_name}")\
-                    .object().model.status.conditions.can_match({'status': "ready"})
-
-                # wait for cluster to be ready
-                ready = wait(ready_pred, timeout_seconds)
-
-                if not ready:
-                    sys.exit(1)
-
-                print(f"SparkCluster {cluster_prefix}-{cluster_name} created")
-                # task_instance = context['task_instance']
-                # Pulls the return_value XCOM from "pushing_task"
-                # task_instance.xcom_push(key="spark_cluster", value="ross")
-            else:
-                print(f"Spark Cluster already exists {cluster_prefix}-{cluster_name}")
-
             with open('spark-info.txt', 'w') as file:
-                    file.write(f"{cluster_prefix}-{cluster_name}")
+                file.write(f"{cluster_prefix}-{cluster_name}\n")
+                file.write(f"{worker_nodes}")
+
+            # Only create Spark cluster if it doesn't exist
+            if cluster_count > 0:
+                print(f"Spark Cluster already exists {cluster_prefix}-{cluster_name}")
+                sys.exit(0)
+
+            template_data = {"clustername": f"{cluster_prefix}-{cluster_name}", "workernodes": f"{worker_nodes}"}
+            applied_template = Template(open("spark-cluster.yaml").read())
+
+            print(f"Creating SparkCluster {cluster_prefix}-{cluster_name} ...")
+            # print(applied_template.render(template_data))
+            oc.create(applied_template.render(template_data))
+
+            # predicate function to check if the master node and all worker nodes are ready
+            cluster_ready = lambda _: \
+            oc.selector(f"replicationcontroller/{cluster_prefix}-{cluster_name}-m")\
+            .object().model.status.can_match({ 'readyReplicas': 1 }) &\
+            oc.selector(f"replicationcontroller/{cluster_prefix}-{cluster_name}-w")\
+            .object().model.status.can_match({ 'readyReplicas': int(worker_nodes) })
+
+            # wait for cluster to be ready
+            print("Waiting for spark cluster to be ready...")
+            ready = wait(cluster_ready, timeout_seconds)
+
+            if not ready:
+                print(f"Cluster was not ready after a given timeout {timeout}s")
+                sys.exit(1)
+
+            print(f"SparkCluster {cluster_prefix}-{cluster_name} is ready.")
+
