@@ -14,17 +14,21 @@ def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 
-def get_cluster_name(index = 0):
+def get_cluster_name(index = 0, from_env=False):
     # Get the cluster name from env var or from spark-info.txt file
 
-    if (os.path.exists('spark-info.txt')):
+    if os.path.exists('spark-info.txt') and not from_env:
         print("Retrieving spark cluster name from spark-info.txt file...")
         with open('spark-info.txt', 'r') as sparkinfo:
             spark_cluster_name = sparkinfo.readlines()[0 + (index * 2)].replace("\n", "").strip()
         os.environ['SPARK_CLUSTER'] = spark_cluster_name
         print(f"Found new cluster name: {spark_cluster_name}")
         return spark_cluster_name
-    return os.environ['SPARK_CLUSTER']
+
+    if os.environ['SPARK_CLUSTER'].startswith('spark-cluster-'):
+        return os.environ['SPARK_CLUSTER']
+
+    return f"spark-cluster-{os.environ['SPARK_CLUSTER']}"
 
 
 def get_driver_host_ip():
@@ -145,12 +149,16 @@ def start_spark_cluster(cluster_name = "default", worker_nodes = "2", timeout_se
                     print(f"Spark Cluster already exists {cluster_prefix}-{cluster_name}")
                     sys.exit(0)
 
-                template_data = {"clustername": f"{cluster_prefix}-{cluster_name}", "workernodes": f"{worker_nodes}"}
+                template_data = {"clustername": f"{cluster_prefix}-{cluster_name}", "workernodes": f"{worker_nodes}", "project": project}
                 applied_template = Template(open("spark-cluster.yaml").read())
 
                 print(f"Creating SparkCluster {cluster_prefix}-{cluster_name} ...")
                 # print(applied_template.render(template_data))
                 oc.create(applied_template.render(template_data))
+
+                route_template = Template(open("spark-cluster-route.yaml").read())
+                print("Creating or updating route for Spark UI... ")
+                oc.apply(route_template.render(template_data))
 
                 # predicate function to check if the master node and all worker nodes are ready
                 cluster_ready = lambda _: \
