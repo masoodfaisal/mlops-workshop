@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../ml-training"
+		},
+		{
+			"path": "../../../ml-workshop"
+		},
+		{
+			"path": "../../../ml-training-main"
+		}
+	],
+	"settings": {}
+}
